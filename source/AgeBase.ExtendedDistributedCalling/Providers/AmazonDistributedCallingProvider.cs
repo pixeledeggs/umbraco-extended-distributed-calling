@@ -17,20 +17,12 @@ namespace AgeBase.ExtendedDistributedCalling.Providers
     {
         public List<string> GetServers()
         {
-            if (ConfigurationManager.AppSettings["AWS_ACCESS_KEY_ID"] == null)
-                throw new ArgumentException("Missing AWS_ACCESS_KEY_ID app setting");
-
-            if (ConfigurationManager.AppSettings["AWS_SECRET_KEY"] == null)
-                throw new ArgumentException("Missing AWS_SECRET_KEY app setting");
-
             if (ConfigurationManager.AppSettings["AWS_ENV_NAME"] == null)
                 throw new ArgumentException("Missing AWS_ENV_NAME app setting");
 
             if (ConfigurationManager.AppSettings["AWS_REGION"] == null)
                 throw new ArgumentException("Missing AWS_REGION app setting");
 
-            var accessKey = ConfigurationManager.AppSettings["AWS_ACCESS_KEY_ID"];
-            var secretKey = ConfigurationManager.AppSettings["AWS_SECRET_KEY"];
             var environmentName = ConfigurationManager.AppSettings["AWS_ENV_NAME"];
 
             RegionEndpoint regionEndpoint = null;
@@ -73,14 +65,14 @@ namespace AgeBase.ExtendedDistributedCalling.Providers
                 throw new ArgumentException("Incorrect AWS_REGION endpoint");
 
             // Create client
-            var elasticBeanstalkClient = new AmazonElasticBeanstalkClient(accessKey, secretKey, regionEndpoint);
+            var elasticBeanstalkClient = new AmazonElasticBeanstalkClient(regionEndpoint);
 
             // Get environment resources for environment
             var environmentResourcesRequest = new DescribeEnvironmentResourcesRequest { EnvironmentName = environmentName };
             var resourceResponse = elasticBeanstalkClient.DescribeEnvironmentResources(environmentResourcesRequest);
 
             // Create ELB client
-            var elasticLoadBalancingClient = new AmazonElasticLoadBalancingClient(accessKey, secretKey, regionEndpoint);
+            var elasticLoadBalancingClient = new AmazonElasticLoadBalancingClient(regionEndpoint);
 
             // Get load balancers for all environment's load balancers
             var loadBalancersRequest = new DescribeLoadBalancersRequest();
@@ -91,7 +83,7 @@ namespace AgeBase.ExtendedDistributedCalling.Providers
             var describeLoadBalancersResponse = elasticLoadBalancingClient.DescribeLoadBalancers(loadBalancersRequest);
 
             // Create EC2 client
-            var ec2Client = new AmazonEC2Client(accessKey, secretKey, regionEndpoint);
+            var ec2Client = new AmazonEC2Client(regionEndpoint);
 
             // Get instances for all instance ids in all load balancers
             var instancesRequest = new DescribeInstancesRequest();
